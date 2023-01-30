@@ -23,9 +23,9 @@ namespace Phlox.Pages
                 .Build();
 
             var priceMoney = new Money.Builder()
-              .Amount(1000L)
-              .Currency("USD")
-              .Build();
+                .Amount(1000L)
+                .Currency("USD")
+                .Build();
 
             var quickPay = new QuickPay.Builder(
                 name: "Auto Detailing",
@@ -46,6 +46,7 @@ namespace Phlox.Pages
                 {
                     Source = result.PaymentLink.Url,
                 };
+                //webvView.
 
                 content.Content = webvView;
                 webvView.Reload();
