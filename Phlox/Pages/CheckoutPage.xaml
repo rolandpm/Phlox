@@ -2,6 +2,5 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Phlox.Pages.CheckoutPage"
-             Title="CheckoutPage"
-             x:Name = "content">
+             Title="CheckoutPage">
 </ContentPage>
