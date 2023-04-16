@@ -9,57 +9,54 @@ namespace Phlox;
 
 public partial class MainPage : ContentPage
 {
-	int count = 0;
+	int Count = 0;
     private SquareClient Client;
-    private Square.Environment SqEnv = Square.Environment.Sandbox;
-    private string clientAccessToken;
+    private Square.Environment SqEnv;
+
+    private string ClientAccessToken;
     private string Source;
+
+    private DeviceCode DeviceCode;
 
     public MainPage()
 	{
 		InitializeComponent();
 
-        InitializeComponent();
-
         SqEnv = Square.Environment.Sandbox;
-        clientAccessToken = "EAAAEM_ZfQRei27WO2zR_V8loSNuntgz_prw8RJ6dTYp93ME3L_FSC3EMhm4bbRb";
+
+        // Sandbox
+        ClientAccessToken = "EAAAEM_ZfQRei27WO2zR_V8loSNuntgz_prw8RJ6dTYp93ME3L_FSC3EMhm4bbRb";
+        // Production
+        //ClientAccessToken = "EAAAEarl0xq8aFAr_KZEVzEnRY9NjX2w7U5foBFzJZTgTDpCecY6ueE7N_VFSbiX";
 
         Client = new SquareClient.Builder()
             .Environment(SqEnv)
-            .AccessToken(clientAccessToken)
+            .AccessToken(ClientAccessToken)
             .Build();
 
-        var priceMoney = new Money.Builder()
-            .Amount(1000L)
-            .Currency("USD")
+        DeviceCode = new DeviceCode.Builder(productType: "TERMINAL_API")
+            .Name("MoneyMaker")
+            .LocationId("L4P1949RZ3WFT")
             .Build();
-
-        var quickPay = new QuickPay.Builder(
-            name: "Auto Detailing",
-            priceMoney: priceMoney,
-            locationId: "L4P1949RZ3WFT")
-            .Build();
-
-        var body = new CreatePaymentLinkRequest.Builder()
-            .IdempotencyKey(Guid.NewGuid().ToString())
-            .QuickPay(quickPay)
-            .Build();
-
-        var result = Client.CheckoutApi.CreatePaymentLink(body: body);
-        this.Source = result.PaymentLink.Url;
     }
 
 	private async void BrowserOpen_Clicked(object sender, EventArgs e)
 	{
-        //Testing a payment
+        //Testing a request
+        var body = new CreateDeviceCodeRequest.Builder(idempotencyKey: Guid.NewGuid().ToString(), deviceCode: DeviceCode)
+            .Build();
+
         try
         {
-            Uri uri = new Uri(this.Source);
-            await Browser.Default.OpenAsync(uri, BrowserLaunchMode.SystemPreferred);
+            var result = await Client.DevicesApi.CreateDeviceCodeAsync(body: body);
+
+            CounterBtn.Text = result.DeviceCode.Code;
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
-            // An unexpected error occurred. No browser may be installed on the device.
+            Console.WriteLine("Failed to make the request");
+            Console.WriteLine($"Response Code: {ex.ResponseCode}");
+            Console.WriteLine($"Exception: {ex.Message}");
         }
         /*var amountMoney = new Money.Builder()
             .Amount(1500L)
