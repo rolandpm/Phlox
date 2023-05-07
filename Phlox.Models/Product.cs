@@ -10,9 +10,9 @@ namespace Phlox.Models
     public class Product
     {
         [Key]
-        public required string Type { get; set; }
+        public required string Product_Type { get; set; }
 
-        public required string Name { get; set; }
+        public required string Product_Name { get; set; }
 
         public required int Price { get; set; }
     }

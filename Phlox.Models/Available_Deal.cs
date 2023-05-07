@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace Phlox.Models
 {
-    public class AvailableDeal
+    public class Available_Deal
     {
         [Key]
-        [ForeignKey("Id")]
-        public required Guid DealId { get; set; }
+        [ForeignKey("Deal_Id")]
+        public required Guid Deal_Id { get; set; }
 
         [Key]
-        [ForeignKey("Id")]
-        public required Guid ItemId { get; set; }
+        [ForeignKey("Item_Id")]
+        public required Guid Item_Id { get; set; }
     }
 }

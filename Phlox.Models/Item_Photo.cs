@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Phlox.Models
 {
-    public class Deal
+    public class Item_Photo
     {
         [Key]
-        public Guid Deal_Id { get; set; }
+        [ForeignKey("Item_Id")]
+        public Guid Item_Id { get; set; }
 
-        public required string Deal_Name { get; set; }
-
-        public int Discount { get; set; }
-
-        public string? Info { get; set; }
+        public required byte[] Photo { get; set; }
     }
 }

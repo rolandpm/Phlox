@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Phlox.Models
 {
-    public class User
+    public class Users
     {
         [Key]
-        public required Guid Id { get; set; }
-        public required string FirstName { get; set; }
-        public required string LastName { get; set; }
-        public required string Username { get; set; }
+        public required Guid User_Id { get; set; }
+        public required string Last_Name { get; set; }
+        public required string First_Name { get; set; }
+        public required string Nickname { get; set; }
         public string? Email { get; set; }
     }
 }

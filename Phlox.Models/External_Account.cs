@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace Phlox.Models
 {
-    public class ExternalAccount
+    public class External_Account
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid External_Account_Id { get; set; }
 
-        [ForeignKey("Id")]
-        public Guid UserId { get; set; }
+        [ForeignKey("User_Id")]
+        public Guid User_Id { get; set; }
 
-        public required string ServiceName { get; set; }
+        public required string Service_Name { get; set; }
 
-        public required string Username { get; set; }
+        public required string Nickname { get; set; }
 
     }
 }

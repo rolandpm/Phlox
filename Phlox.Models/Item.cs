@@ -11,18 +11,18 @@ namespace Phlox.Models
     public class Item
     {
         [Key]
-        public required Guid Id { get; set; }
+        public required Guid Item_Id { get; set; }
 
-        [ForeignKey("Id")]
-        public required Guid UserId { get; set; }
+        [ForeignKey("User_Id")]
+        public required Guid User_Id { get; set; }
 
-        [ForeignKey("Type")]
-        public required string ProductType { get; set; }
+        [ForeignKey("Product_Type")]
+        public required string Product_Type { get; set; }
 
-        public required string Name { get; set; }
+        public required string Item_Name { get; set; }
 
         public required int Quantity { get; set; }
 
-        public string? Description { get; set; }
+        public string? Info { get; set; }
     }
 }
