@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Phlox.Models
+namespace phlox.models
 {
     public class Available_Deal
     {
