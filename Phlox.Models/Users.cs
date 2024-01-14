@@ -10,10 +10,10 @@ namespace Phlox.Models
     public class Users
     {
         [Key]
-        public required Guid User_Id { get; set; }
-        public required string Last_Name { get; set; }
-        public required string First_Name { get; set; }
-        public required string Nickname { get; set; }
-        public string? Email { get; set; }
+        public required Guid user_id { get; set; }
+        public required string last_name { get; set; }
+        public required string first_name { get; set; }
+        public required string nickname { get; set; }
+        public string? email { get; set; }
     }
 }

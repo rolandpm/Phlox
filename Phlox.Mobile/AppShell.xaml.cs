@@ -1,9 +1,10 @@
-﻿namespace Phlox;
-
-public partial class AppShell : Shell
+﻿namespace Phlox.Mobile
 {
-	public AppShell()
-	{
-		InitializeComponent();
-	}
+    public partial class AppShell : Shell
+    {
+        public AppShell()
+        {
+            InitializeComponent();
+        }
+    }
 }

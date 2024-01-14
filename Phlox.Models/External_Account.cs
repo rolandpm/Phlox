@@ -11,14 +11,14 @@ namespace Phlox.Models
     public class External_Account
     {
         [Key]
-        public Guid External_Account_Id { get; set; }
+        public Guid external_account_id { get; set; }
 
         [ForeignKey("User_Id")]
-        public Guid User_Id { get; set; }
+        public Guid user_id { get; set; }
 
-        public required string Service_Name { get; set; }
+        public required string service_name { get; set; }
 
-        public required string Nickname { get; set; }
+        public required string nickname { get; set; }
 
     }
 }

@@ -5,17 +5,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-namespace phlox.models
+namespace Phlox.Models
 {
+    [PrimaryKey(nameof(deal_id), nameof(item_id))]
     public class Available_Deal
     {
-        [Key]
         [ForeignKey("Deal_Id")]
-        public required Guid Deal_Id { get; set; }
+        public required Guid deal_id { get; set; }
 
-        [Key]
         [ForeignKey("Item_Id")]
-        public required Guid Item_Id { get; set; }
+        public required Guid item_id { get; set; }
     }
 }

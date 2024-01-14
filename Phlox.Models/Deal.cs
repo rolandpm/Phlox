@@ -10,12 +10,12 @@ namespace Phlox.Models
     public class Deal
     {
         [Key]
-        public Guid Deal_Id { get; set; }
+        public Guid deal_id { get; set; }
 
-        public required string Deal_Name { get; set; }
+        public required string deal_name { get; set; }
 
-        public int Discount { get; set; }
+        public int discount { get; set; }
 
-        public string? Info { get; set; }
+        public string? info { get; set; }
     }
 }

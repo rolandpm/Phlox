@@ -12,8 +12,8 @@ namespace Phlox.Models
     {
         [Key]
         [ForeignKey("Item_Id")]
-        public Guid Item_Id { get; set; }
+        public Guid item_Id { get; set; }
 
-        public required byte[] Photo { get; set; }
+        public required byte[] photo { get; set; }
     }
 }
