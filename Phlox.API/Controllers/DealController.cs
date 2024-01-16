@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿//TODDO: COMMENTS
+
+using Microsoft.AspNetCore.Mvc;
 using Phlox.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,9 +12,9 @@ namespace Phlox.API.Controllers
     {
 
         /// <summary>
-        /// Gets all the deals
+        /// Gets all the products
         /// </summary>
-        /// <returns>List of all deals</returns>
+        /// <returns>List of all products</returns>
         [HttpGet]
         public async Task<ActionResult<List<Deal>>> GetAll()
         {
@@ -22,59 +24,59 @@ namespace Phlox.API.Controllers
         }
 
         /// <summary>
-        /// Gets a deal based on ID.
+        /// Gets a product based on ID.
         /// </summary>
-        /// <param name="id">The deal ID</param>
+        /// <param name="id">The product ID</param>
         /// <returns>Deal with matching ID</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Deal>> Get(int id)
         {
-            Deal? deal = await (
+            Deal? product = await (
                 from u in Context.Deal
                 where u.Id == id
                 select u
             ).FirstOrDefaultAsync();
 
-            if (deal is null)
+            if (product is null)
             {
-                Logger.LogInformation($"DealController.Get did not find deal with an ID of {id}");
+                Logger.LogInformation($"DealController.Get did not find product with an ID of {id}");
                 return NotFound();
             }
 
-            Logger.LogInformation($"DealController.Get found deal {deal}");
-            return deal;
+            Logger.LogInformation($"DealController.Get found product {product}");
+            return product;
         }
 
         /// <summary>
-        /// Creates the specified deal.
+        /// Creates the specified product.
         /// </summary>
-        /// <param name="deal">The deal.</param>
+        /// <param name="product">The product.</param>
         /// <returns>Deal that was created.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create(Deal deal)
+        public async Task<IActionResult> Create(Deal product)
         {
-            Context.Add(deal);
+            Context.Add(product);
             await Context.SaveChangesAsync();
 
-            Logger.LogInformation($"Deal {deal.Name} created");
+            Logger.LogInformation($"Deal {product.Name} created");
 
-            return CreatedAtAction(nameof(Get), new {id = deal.Id}, deal);
+            return CreatedAtAction(nameof(Get), new {id = product.Id}, product);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Deal deal)
+        public async Task<IActionResult> Update(int id, Deal product)
         {
-            deal.Id = id;
+            product.Id = id;
             var result = await Get(id);
             var existingDeal = result.Value;
 
             if (existingDeal is null)
             {
-                Logger.LogInformation($"Deal {deal.Name} not found");
+                Logger.LogInformation($"Deal {product.Name} not found");
                 return NotFound();
             }
 
-            Context.Entry(existingDeal).CurrentValues.SetValues(deal);
+            Context.Entry(existingDeal).CurrentValues.SetValues(product);
             await Context.SaveChangesAsync();
 
             return NoContent();
@@ -84,11 +86,11 @@ namespace Phlox.API.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var result = await Get(id);
-            var deal = result.Value;
+            var product = result.Value;
 
-            if (deal is null) return NotFound("Deal not found");
+            if (product is null) return NotFound("Deal not found");
 
-            Context.Remove(deal);
+            Context.Remove(product);
             await Context.SaveChangesAsync();
 
             return NoContent();
