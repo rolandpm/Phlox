@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Phlox.Models
@@ -10,12 +13,18 @@ namespace Phlox.Models
     public class Deal
     {
         [Key]
-        public Guid deal_id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [SwaggerSchema(ReadOnly = true)]
+        public int? Id { get; set; }
 
-        public required string deal_name { get; set; }
+        [Required]
+        public required string Name { get; set; }
 
-        public int discount { get; set; }
+        public int Discount { get; set; }
 
-        public string? info { get; set; }
+        public string? Info { get; set; }
+
+        [JsonIgnore]
+        public List<ItemDeal> ItemDeals { get; } = [];
     }
 }

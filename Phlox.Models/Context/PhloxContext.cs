@@ -1,17 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Phlox.Models
 {
-    public partial class PhloxContext : DbContext
+    public class PhloxContext(DbContextOptions<PhloxContext> options) : DbContext(options)
     {
-        public PhloxContext(DbContextOptions<PhloxContext> options) : base(options) { }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.UseIdentityAlwaysColumns();
+        }
 
-        public DbSet<Users> users { get; set; } = null!;
-        public DbSet<Product> product { get; set; } = null!;
-        public DbSet<Item> item { get; set; } = null!;
-        public DbSet<Item_Photo> item_photo { get; set; } = null!;
-        public DbSet<Deal> deal { get; set; } = null!;
-        public DbSet<Available_Deal> available_deal { get; } = null!;
-        public DbSet<External_Account> external_account { get; set; } = null!;
+        public DbSet<Users> Users { get; set; } = null!;
+        public DbSet<Product> Product { get; set; } = null!;
+        public DbSet<Item> Item { get; set; } = null!;
+        public DbSet<ItemPhoto> ItemPhoto { get; set; } = null!;
+        public DbSet<Deal> Deal { get; set; } = null!;
+        public DbSet<ItemDeal> ItemDeal { get; set; } = null!;
+        public DbSet<ExternalAccount> ExternalAccount { get; set; } = null!;
     }
 }

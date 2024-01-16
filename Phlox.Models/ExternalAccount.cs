@@ -10,28 +10,25 @@ using System.Threading.Tasks;
 
 namespace Phlox.Models
 {
-    public class Users
+    public class ExternalAccount
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [SwaggerSchema(ReadOnly = true)]
         public int? Id { get; set; }
 
+        [ForeignKey(nameof(User))]
         [Required]
-        public required string LastName { get; set; }
+        public required int UserId { get; set; }
 
         [Required]
-        public required string FirstName { get; set; }
+        public required string ServiceName { get; set; }
 
         [Required]
         public required string Nickname { get; set; }
 
-        public string? Email { get; set; }
-
         [JsonIgnore]
-        public List<Item>? Items { get; }
+        public required Users User { get; init; }
 
-        [JsonIgnore]
-        public List<ExternalAccount>? ExternalAccounts { get; } = [];
     }
 }
