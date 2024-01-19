@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql;
 using Phlox.Models;
+using System.Reflection;
 
 namespace Phlox.API
 {

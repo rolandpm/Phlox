@@ -1,41 +1,36 @@
-﻿//TODDO: COMMENTS
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Phlox.Models;
+using Phlox.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Phlox.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ProductController(PhloxContext context) : BaseController<ProductController>(context)
+    public class ProductController : BaseController<ProductController>
     {
 
         /// <summary>
-        /// Gets all the products
+        /// Gets all the Products
         /// </summary>
-        /// <returns>List of all products</returns>
+        /// <returns>Returns a list of all Products</returns>
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> GetAll()
+        public ActionResult<List<Product>> GetAll()
         {
             Logger.LogInformation("ProductController.GetAll called");
 
-            return await Context.Product.ToListAsync();
+            return Context.GetAllProducts();
         }
 
         /// <summary>
         /// Gets a product based on ID.
         /// </summary>
         /// <param name="id">The product ID</param>
-        /// <returns>Product with matching ID</returns>
+        /// <returns>Returns the product matching the ID specified. Returns 404 if the product does not exist.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> Get(int id)
+        public ActionResult<Product> GetById(int id)
         {
-            Product? product = await (
-                from u in Context.Product
-                where u.Id == id
-                select u
-            ).FirstOrDefaultAsync();
+            Product? product = Context.GetProductById(id);
 
             if (product is null)
             {
@@ -51,48 +46,54 @@ namespace Phlox.API.Controllers
         /// Creates the specified product.
         /// </summary>
         /// <param name="product">The product.</param>
-        /// <returns>Product that was created.</returns>
+        /// <returns>Returns the result of the create action.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create(Product product)
+        public IActionResult Create(ProductDTO productDTO)
         {
-            Context.Add(product);
-            await Context.SaveChangesAsync();
+            var newProduct = productDTO.ToModel();
+            Context.CreateProduct(newProduct);
 
-            Logger.LogInformation($"Product {product.Name} created");
-
-            return CreatedAtAction(nameof(Get), new {id = product.Id}, product);
+            Logger.LogInformation($"ProductController.Create created product {newProduct}");
+            return CreatedAtAction(nameof(GetById), new { id = newProduct.Id }, newProduct);
         }
 
+        /// <summary>
+        /// Updates the specified Product.
+        /// </summary>
+        /// <param name="id">The ID of the product.</param>
+        /// <param name="productDTO">The product dto.</param>
+        /// <returns>Returns the result of the update action. Returns 404 if the product does not exist.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Product product)
+        public IActionResult Update(int id, ProductDTO productDTO)
         {
+            Product product = productDTO.ToModel();
             product.Id = id;
-            var result = await Get(id);
-            var existingProduct = result.Value;
 
-            if (existingProduct is null)
+            if (!Context.UpdateProduct(product))
             {
-                Logger.LogInformation($"Product {product.Name} not found");
-                return NotFound();
+                Logger.LogInformation($"ProductController.Update did not find product with an ID of {id}");
+                return NotFound("External account not found");
             }
 
-            Context.Entry(existingProduct).CurrentValues.SetValues(product);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"ProductController.Update updated product with an ID of {id}");
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes the specified product.
+        /// </summary>
+        /// <param name="id">The identifier of the product to delete</param>
+        /// <returns>Returns the result of the delete action. Returns 404 if the product does not exist.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var result = await Get(id);
-            var product = result.Value;
+            if (!Context.DeleteProduct(id))
+            {
+                Logger.LogInformation($"ProductController.Delete did not find product with an ID of {id}");
+                return NotFound("External account not found");
+            }
 
-            if (product is null) return NotFound("Product not found");
-
-            Context.Remove(product);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"ProductController.Update updated product with an ID of {id}");
             return NoContent();
         }
     }

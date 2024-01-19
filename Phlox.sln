@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phlox.Models", "Phlox.Model
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phlox.API", "Phlox.API\Phlox.API.csproj", "{7BF54D0B-2B15-4068-B439-6C185662A393}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phlox.Mobile", "Phlox.Mobile\Phlox.Mobile.csproj", "{B2F89590-8EF1-48D6-A075-E405EF9D6112}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phlox.Mobile", "Phlox.Mobile\Phlox.Mobile.csproj", "{B2F89590-8EF1-48D6-A075-E405EF9D6112}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

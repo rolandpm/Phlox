@@ -1,4 +1,5 @@
-﻿using Swashbuckle.AspNetCore.Annotations;
+﻿using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace Phlox.Models
 {
+    [PrimaryKey(nameof(Id))]
     public class Users
     {
-        [Key]
+        //TODO: ToString
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [SwaggerSchema(ReadOnly = true)]
-        public int? Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public required string LastName { get; set; }
@@ -29,9 +30,34 @@ namespace Phlox.Models
         public string? Email { get; set; }
 
         [JsonIgnore]
-        public List<Item>? Items { get; }
+        public List<Item>? Items { get; } = new();
 
         [JsonIgnore]
-        public List<ExternalAccount>? ExternalAccounts { get; } = [];
+        public List<ExternalAccount>? ExternalAccounts { get; } = new();
+    }
+
+    public class UsersDTO
+    {
+        [JsonRequired]
+        public required string LastName { get; set; }
+
+        [JsonRequired]
+        public required string FirstName { get; set; }
+
+        [JsonRequired]
+        public required string Nickname { get; set; }
+
+        public string? Email { get; set; }
+
+        public Users ToModel()
+        {
+            return new Users
+            {
+                LastName = LastName,
+                FirstName = FirstName,
+                Nickname = Nickname,
+                Email = Email
+            };
+        }
     }
 }

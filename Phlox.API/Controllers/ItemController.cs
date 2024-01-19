@@ -1,49 +1,44 @@
-﻿//TODDO: COMMENTS
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Phlox.Models;
+using Phlox.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Phlox.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ItemController(PhloxContext context) : BaseController<ItemController>(context)
+    public class ItemController : BaseController<ItemController>
     {
 
         /// <summary>
         /// Gets all the Item
         /// </summary>
-        /// <returns>List of all Item</returns>
+        /// <returns>Returns a list of all Items</returns>
         [HttpGet]
-        public async Task<ActionResult<List<Item>>> GetAll()
+        public ActionResult<List<Item>> GetAll()
         {
-            Logger.LogInformation("itemController.GetAll called");
+            Logger.LogInformation("ItemController.GetAll called");
 
-            return await Context.Item.ToListAsync();
+            return Context.GetAllItems();
         }
 
         /// <summary>
         /// Gets a item based on ID.
         /// </summary>
         /// <param name="id">The item ID</param>
-        /// <returns>item with matching ID</returns>
+        /// <returns>Returns the item matching the ID specified. Returns 404 if the item does not exist.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Item>> Get(int id)
+        public ActionResult<Item> GetById(int id)
         {
-            Item? item = await (
-                from u in Context.Item
-                where u.Id == id
-                select u
-            ).FirstOrDefaultAsync();
+            Item? item = Context.GetItemById(id);
 
             if (item is null)
             {
-                Logger.LogInformation($"itemController.Get did not find item with an ID of {id}");
+                Logger.LogInformation($"ItemController.Get did not find item with an ID of {id}");
                 return NotFound();
             }
 
-            Logger.LogInformation($"itemController.Get found item {item}");
+            Logger.LogInformation($"ItemController.Get found item {item}");
             return item;
         }
 
@@ -51,44 +46,67 @@ namespace Phlox.API.Controllers
         /// Creates the specified item.
         /// </summary>
         /// <param name="item">The item.</param>
-        /// <returns>item that was created.</returns>
+        /// <returns>Returns the result of the create action.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create(Item item)
+        public IActionResult Create(ItemDTO itemDTO)
         {
-            Context.Add(item);
-            await Context.SaveChangesAsync();
+            //If user doesn't exist
+            if (Context.GetUserById(itemDTO.UserId) is null)
+            {
+                Logger.LogInformation($"ItemController.Create did not find User with an ID of {itemDTO.UserId}");
+                return NotFound("User not found");
+            }
+            //If product doesn't exist
+            if (Context.GetProductById(itemDTO.ProductId) is null)
+            {
+                Logger.LogInformation($"ItemController.Create did not find Product with an ID of {itemDTO.ProductId}");
+                return NotFound("Product not found");
+            }
 
-            Logger.LogInformation($"Item {item.Name} created");
+            var newItem = itemDTO.ToModel();
+            Context.CreateItem(newItem);
 
-            return CreatedAtAction(nameof(Get), new {id = item.Id}, item);
+            Logger.LogInformation($"ItemController.Create created item {newItem}");
+            return CreatedAtAction(nameof(GetById), new { id = newItem.Id }, newItem);
         }
 
+        /// <summary>
+        /// Updates the specified External Account.
+        /// </summary>
+        /// <param name="id">The ID of the item.</param>
+        /// <param name="itemDTO">The item dto.</param>
+        /// <returns>Returns the result of the update action. Returns 404 if the item does not exist.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Item item)
+        public IActionResult Update(int id, ItemDTO itemDTO)
         {
+            Item item = itemDTO.ToModel();
             item.Id = id;
-            var result = await Get(id);
-            var existingitem = result.Value;
 
-            if (existingitem is null) return NotFound();
+            if (!Context.UpdateItem(item))
+            {
+                Logger.LogInformation($"ItemController.Update did not find item with an ID of {id}");
+                return NotFound("External account not found");
+            }
 
-            Context.Entry(existingitem).CurrentValues.SetValues(item);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"ItemController.Update updated item with an ID of {id}");
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes the specified item.
+        /// </summary>
+        /// <param name="id">The identifier of the item to delete</param>
+        /// <returns>Returns the result of the delete action. Returns 404 if the item does not exist.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var result = await Get(id);
-            var item = result.Value;
+            if (!Context.DeleteItem(id))
+            {
+                Logger.LogInformation($"ItemController.Delete did not find item with an ID of {id}");
+                return NotFound("External account not found");
+            }
 
-            if (item is null) return NotFound("item not found");
-
-            Context.Remove(item);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"ItemController.Update updated item with an ID of {id}");
             return NoContent();
         }
     }

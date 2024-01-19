@@ -1,49 +1,45 @@
-﻿//TODDO: COMMENTS
-
+﻿
 using Microsoft.AspNetCore.Mvc;
 using Phlox.Models;
+using Phlox.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Phlox.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ItemDealController(PhloxContext context) : BaseController<ItemDealController>(context)
+    public class ItemDealController : BaseController<ItemDealController>
     {
 
         /// <summary>
         /// Gets all the ItemDeal
         /// </summary>
-        /// <returns>List of all ItemDeal</returns>
+        /// <returns>Returns a list of all ItemDeals</returns>
         [HttpGet]
-        public async Task<ActionResult<List<ItemDeal>>> GetAll()
+        public ActionResult<List<ItemDeal>> GetAll()
         {
-            Logger.LogInformation("itemDealController.GetAll called");
+            Logger.LogInformation("ItemDealController.GetAll called");
 
-            return await Context.ItemDeal.ToListAsync();
+            return Context.GetAllItemDeals();
         }
 
         /// <summary>
         /// Gets a itemDeal based on ID.
         /// </summary>
-        /// <param name="id">The itemDeal ID</param>
-        /// <returns>itemDeal with matching ID</returns>
+        /// <param name="itemId">The itemDeal ID</param>
+        /// <returns>Returns the itemDeal matching the ID specified. Returns 404 if the itemDeal does not exist.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<ItemDeal>> Get(int itemId, int dealId)
+        public ActionResult<ItemDeal> GetById(int itemId, int dealId)
         {
-            ItemDeal? itemDeal = await (
-                from u in Context.ItemDeal
-                where u.ItemId == itemId && u.DealId == dealId
-                select u
-            ).FirstOrDefaultAsync();
+            ItemDeal? itemDeal = Context.GetItemDealById(itemId, dealId);
 
             if (itemDeal is null)
             {
-                Logger.LogInformation($"itemDealController.Get did not find itemDeal");
+                Logger.LogInformation($"ItemDealController.Get did not find itemDeal with itemId of {itemId} and dealId of {dealId}");
                 return NotFound();
             }
 
-            Logger.LogInformation($"itemDealController.Get found itemDeal {itemDeal}");
+            Logger.LogInformation($"ItemDealController.Get found itemDeal {itemDeal}");
             return itemDeal;
         }
 
@@ -51,30 +47,46 @@ namespace Phlox.API.Controllers
         /// Creates the specified itemDeal.
         /// </summary>
         /// <param name="itemDeal">The itemDeal.</param>
-        /// <returns>itemDeal that was created.</returns>
+        /// <returns>Returns the result of the create action. Returns 404 if the userID specified in the itemDeal to create doesn't exist.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create(ItemDeal itemDeal)
+        public IActionResult Create(ItemDealDTO itemDealDTO)
         {
-            Context.Add(itemDeal);
-            await Context.SaveChangesAsync();
+            //If Item doesn't exist
+            if (Context.GetItemById(itemDealDTO.ItemId) is null)
+            {
+                Logger.LogInformation($"ItemDealController.Create did not find Item {itemDealDTO.ItemId}");
+                return NotFound("Item not found");
+            }
 
-            Logger.LogInformation($"ItemDeal created");
+            //If Deall doesn't exist
+            if (Context.GetDealById(itemDealDTO.DealId) is null)
+            {
+                Logger.LogInformation($"ItemDealController.Create did not find ItemDeal with dealId of {itemDealDTO.DealId}");
+                return NotFound("Deal not found");
+            }
 
-            return CreatedAtAction(nameof(Get), 
-                new {itemId = itemDeal.ItemId, dealId = itemDeal.DealId}, itemDeal);
+            var newItemDeal = itemDealDTO.ToModel();
+            Context.CreateItemDeal(newItemDeal);
+
+            Logger.LogInformation($"ItemDealController.Create created itemDeal {newItemDeal}");
+            return CreatedAtAction(nameof(GetById), new { id = newItemDeal.ItemId }, newItemDeal);
         }
 
+        /// <summary>
+        /// Deletes the specified itemDeal.
+        /// </summary>
+        /// <param name="itemId">The identifier of the itemDeal to delete</param>
+        /// <returns>Returns the result of the delete action. Returns 404 if the itemDeal does not exist.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int itemId, int dealId)
+        public IActionResult Delete(int itemId, int dealId)
         {
-            var result = await Get(itemId, dealId);
-            var itemDeal = result.Value;
+            if (!Context.DeleteItemDeal(itemId, dealId))
+            {
+                Logger.LogInformation($"ItemDealController.Delete did not find itemDeal with an itemId of {itemId} and dealId of {dealId}");
+                return NotFound("ItemDeal not found");
+            }
 
-            if (itemDeal is null) return NotFound("itemDeal not found");
-
-            Context.Remove(itemDeal);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"ItemDealController.Update updated itemDeal with an itemId of {itemId} and dealId of {dealId}");
             return NoContent();
         }
     }

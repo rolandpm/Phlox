@@ -1,4 +1,5 @@
-﻿using Swashbuckle.AspNetCore.Annotations;
+﻿using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,14 +11,13 @@ using System.Threading.Tasks;
 
 namespace Phlox.Models
 {
+    [PrimaryKey(nameof(Id))]
     public class ExternalAccount
     {
-        [Key]
+        //TODO: ToString
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [SwaggerSchema(ReadOnly = true)]
-        public int? Id { get; set; }
+        public int Id { get; set; }
 
-        [ForeignKey(nameof(User))]
         [Required]
         public required int UserId { get; set; }
 
@@ -28,7 +28,29 @@ namespace Phlox.Models
         public required string Nickname { get; set; }
 
         [JsonIgnore]
-        public required Users User { get; init; }
+        [ForeignKey(nameof(UserId))]
+        public Users? User { get; init; }
+    }
 
+    public class ExternalAccountDTO
+    {
+        [JsonRequired]
+        public int UserId { get; set; }
+
+        [JsonRequired]
+        public required string ServiceName { get; set; }
+
+        [JsonRequired]
+        public required string Nickname { get; set; }
+
+        public ExternalAccount ToModel()
+        {
+            return new ExternalAccount
+            {
+                UserId = UserId,
+                ServiceName = ServiceName,
+                Nickname = Nickname
+            };
+        }
     }
 }

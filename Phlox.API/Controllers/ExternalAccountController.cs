@@ -1,41 +1,37 @@
-﻿//TODDO: COMMENTS
-
+﻿
 using Microsoft.AspNetCore.Mvc;
 using Phlox.Models;
+using Phlox.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Phlox.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ExternalAccountController(PhloxContext context) : BaseController<ExternalAccountController>(context)
+    public class ExternalAccountController : BaseController<ExternalAccountController>
     {
 
         /// <summary>
         /// Gets all the ExternalAccount
         /// </summary>
-        /// <returns>List of all ExternalAccount</returns>
+        /// <returns>Returns a list of all ExternalAccounts</returns>
         [HttpGet]
-        public async Task<ActionResult<List<ExternalAccount>>> GetAll()
+        public ActionResult<List<ExternalAccount>> GetAll()
         {
             Logger.LogInformation("ExternalAccountController.GetAll called");
 
-            return await Context.ExternalAccount.ToListAsync();
+            return Context.GetAllExternalAccounts();
         }
 
         /// <summary>
         /// Gets a externalAccount based on ID.
         /// </summary>
         /// <param name="id">The externalAccount ID</param>
-        /// <returns>externalAccount with matching ID</returns>
+        /// <returns>Returns the externalAccount matching the ID specified. Returns 404 if the externalAccount does not exist.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<ExternalAccount>> Get(int id)
+        public ActionResult<ExternalAccount> GetById(int id)
         {
-            ExternalAccount? externalAccount = await (
-                from u in Context.ExternalAccount
-                where u.Id == id
-                select u
-            ).FirstOrDefaultAsync();
+            ExternalAccount? externalAccount = Context.GetExternalAccountById(id);
 
             if (externalAccount is null)
             {
@@ -51,44 +47,61 @@ namespace Phlox.API.Controllers
         /// Creates the specified externalAccount.
         /// </summary>
         /// <param name="externalAccount">The externalAccount.</param>
-        /// <returns>externalAccount that was created.</returns>
+        /// <returns>Returns the result of the create action. Returns 404 if the userID specified in the externalAccount to create doesn't exist.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create(ExternalAccount externalAccount)
+        public IActionResult Create(ExternalAccountDTO externalAccountDTO)
         {
-            Context.Add(externalAccount);
-            await Context.SaveChangesAsync();
+            //If user doesn't exist
+            if (Context.GetUserById(externalAccountDTO.UserId) is null)
+            {
+                Logger.LogInformation($"ExternalAccountController.Create did not find User with an ID of {externalAccountDTO.UserId}");
+                return NotFound("User not found");
+            }
 
-            Logger.LogInformation($"ExternalAccount {externalAccount.ServiceName} created");
+            var newExternalAccount = externalAccountDTO.ToModel();
+            Context.CreateExternalAccount(newExternalAccount);
 
-            return CreatedAtAction(nameof(Get), new {id = externalAccount.Id}, externalAccount);
+            Logger.LogInformation($"ExternalAccountController.Create created externalAccount {newExternalAccount}");
+            return CreatedAtAction(nameof(GetById), new { id = newExternalAccount.Id }, newExternalAccount);
         }
 
+        /// <summary>
+        /// Updates the specified External Account.
+        /// </summary>
+        /// <param name="id">The ID of the external account.</param>
+        /// <param name="externalAccountDTO">The external account dto.</param>
+        /// <returns>Returns the result of the update action. Returns 404 if the externalAccount does not exist.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, ExternalAccount externalAccount)
+        public IActionResult Update(int id, ExternalAccountDTO externalAccountDTO)
         {
+            ExternalAccount externalAccount = externalAccountDTO.ToModel();
             externalAccount.Id = id;
-            var result = await Get(id);
-            var existingexternalAccount = result.Value;
 
-            if (existingexternalAccount is null) return NotFound();
+            if (!Context.UpdateExternalAccount(externalAccount))
+            {
+                Logger.LogInformation($"ExternalAccountController.Update did not find externalAccount with an ID of {id}");
+                return NotFound("External account not found");
+            }
 
-            Context.Entry(existingexternalAccount).CurrentValues.SetValues(externalAccount);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"ExternalAccountController.Update updated externalAccount with an ID of {id}");
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes the specified externalAccount.
+        /// </summary>
+        /// <param name="id">The identifier of the externalAccount to delete</param>
+        /// <returns>Returns the result of the delete action. Returns 404 if the externalAccount does not exist.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var result = await Get(id);
-            var externalAccount = result.Value;
+            if (!Context.DeleteExternalAccount(id))
+            {
+                Logger.LogInformation($"ExternalAccountController.Delete did not find externalAccount with an ID of {id}");
+                return NotFound("External account not found");
+            }
 
-            if (externalAccount is null) return NotFound("externalAccount not found");
-
-            Context.Remove(externalAccount);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"ExternalAccountController.Update updated externalAccount with an ID of {id}");
             return NoContent();
         }
     }

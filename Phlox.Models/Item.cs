@@ -6,22 +6,21 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Phlox.Models
 {
+    [PrimaryKey(nameof(Id))]
     public class Item
     {
-        [Key]
+        //TODO: ToString
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [SwaggerSchema(ReadOnly = true)]
-        public int? Id { get; set; }
+        public int Id { get; set; }
 
-        [ForeignKey(nameof(User))]
         [Required]
         public required int UserId { get; set; }
 
-        [ForeignKey(nameof(Product))]
         [Required]
         public required int ProductId { get; set; }
 
@@ -34,12 +33,43 @@ namespace Phlox.Models
         public string? Info { get; set; }
 
         [JsonIgnore]
-        public required Users User { get; init; }
+        public List<ItemDeal>? ItemDeals { get; } = new();
 
         [JsonIgnore]
-        public required Product Product { get; init; }
+        [ForeignKey(nameof(UserId))]
+        public Users? User { get; init; }
 
         [JsonIgnore]
-        public List<ItemDeal>? ItemDeals { get; } = [];
+        [ForeignKey(nameof(ProductId))]
+        public Product? Product { get; init; }
+    }
+
+    public class ItemDTO
+    {
+        [JsonRequired]
+        public int UserId { get; set; }
+
+        [JsonRequired]
+        public int ProductId { get; init; }
+
+        [JsonRequired]
+        public required string Name { get; set; }
+
+        [JsonRequired]
+        public required int Quantity { get; set; }
+
+        public string? Info { get; set; }
+
+        public Item ToModel()
+        {
+            return new Item
+            {
+                UserId = UserId,
+                ProductId = ProductId,
+                Name = Name,
+                Quantity = Quantity,
+                Info = Info
+            };
+        }
     }
 }

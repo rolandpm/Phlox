@@ -1,4 +1,5 @@
-﻿using Swashbuckle.AspNetCore.Annotations;
+﻿using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace Phlox.Models
 {
+    [PrimaryKey(nameof(Id))]
     public class Deal
     {
-        [Key]
+        //TODO: ToString
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [SwaggerSchema(ReadOnly = true)]
-        public int? Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public required string Name { get; set; }
@@ -25,6 +26,26 @@ namespace Phlox.Models
         public string? Info { get; set; }
 
         [JsonIgnore]
-        public List<ItemDeal> ItemDeals { get; } = [];
+        public List<ItemDeal> ItemDeals { get; } = new();
+    }
+
+    public class DealDTO
+    {
+        [JsonRequired]
+        public required string Name { get; set; }
+
+        public int Discount { get; set; }
+
+        public string? Info { get; set; }
+
+        public Deal ToModel()
+        {
+            return new Deal
+            {
+                Name = Name,
+                Discount = Discount,
+                Info = Info
+            };
+        }
     }
 }

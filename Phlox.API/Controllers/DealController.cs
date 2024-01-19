@@ -1,98 +1,99 @@
-﻿//TODDO: COMMENTS
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Phlox.Models;
+using Phlox.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Phlox.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class DealController(PhloxContext context) : BaseController<DealController>(context)
+    public class DealController : BaseController<DealController>
     {
 
         /// <summary>
-        /// Gets all the products
+        /// Gets all the Deal
         /// </summary>
-        /// <returns>List of all products</returns>
+        /// <returns>Returns a list of all Deals</returns>
         [HttpGet]
-        public async Task<ActionResult<List<Deal>>> GetAll()
+        public ActionResult<List<Deal>> GetAll()
         {
             Logger.LogInformation("DealController.GetAll called");
 
-            return await Context.Deal.ToListAsync();
+            return Context.GetAllDeals();
         }
 
         /// <summary>
-        /// Gets a product based on ID.
+        /// Gets a deal based on ID.
         /// </summary>
-        /// <param name="id">The product ID</param>
-        /// <returns>Deal with matching ID</returns>
+        /// <param name="id">The deal ID</param>
+        /// <returns>Returns the deal matching the ID specified. Returns 404 if the deal does not exist.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Deal>> Get(int id)
+        public ActionResult<Deal> GetById(int id)
         {
-            Deal? product = await (
-                from u in Context.Deal
-                where u.Id == id
-                select u
-            ).FirstOrDefaultAsync();
+            Deal? deal = Context.GetDealById(id);
 
-            if (product is null)
+            if (deal is null)
             {
-                Logger.LogInformation($"DealController.Get did not find product with an ID of {id}");
+                Logger.LogInformation($"DealController.Get did not find deal with an ID of {id}");
                 return NotFound();
             }
 
-            Logger.LogInformation($"DealController.Get found product {product}");
-            return product;
+            Logger.LogInformation($"DealController.Get found deal {deal}");
+            return deal;
         }
 
         /// <summary>
-        /// Creates the specified product.
+        /// Creates the specified deal.
         /// </summary>
-        /// <param name="product">The product.</param>
-        /// <returns>Deal that was created.</returns>
+        /// <param name="deal">The deal.</param>
+        /// <returns>Returns the result of the create action.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create(Deal product)
+        public IActionResult Create(DealDTO dealDTO)
         {
-            Context.Add(product);
-            await Context.SaveChangesAsync();
+            var newDeal = dealDTO.ToModel();
+            Context.CreateDeal(newDeal);
 
-            Logger.LogInformation($"Deal {product.Name} created");
-
-            return CreatedAtAction(nameof(Get), new {id = product.Id}, product);
+            Logger.LogInformation($"DealController.Create created deal {newDeal}");
+            return CreatedAtAction(nameof(GetById), new { id = newDeal.Id }, newDeal);
         }
 
+        /// <summary>
+        /// Updates the specified deal.
+        /// </summary>
+        /// <param name="id">The ID of the deal.</param>
+        /// <param name="dealDTO">The deal dto.</param>
+        /// <returns>Returns the result of the update action. Returns 404 if the deal does not exist.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Deal product)
+        public IActionResult Update(int id, DealDTO dealDTO)
         {
-            product.Id = id;
-            var result = await Get(id);
-            var existingDeal = result.Value;
+            Deal deal = dealDTO.ToModel();
+            deal.Id = id;
 
-            if (existingDeal is null)
+            if (!Context.UpdateDeal(deal))
             {
-                Logger.LogInformation($"Deal {product.Name} not found");
-                return NotFound();
+                Logger.LogInformation($"DealController.Update did not find deal with an ID of {id}");
+                return NotFound("External account not found");
             }
 
-            Context.Entry(existingDeal).CurrentValues.SetValues(product);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"DealController.Update updated deal with an ID of {id}");
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes the specified deal.
+        /// </summary>
+        /// <param name="id">The identifier of the deal to delete</param>
+        /// <returns>Returns the result of the delete action. Returns 404 if the deal does not exist.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var result = await Get(id);
-            var product = result.Value;
+            if (!Context.DeleteDeal(id))
+            {
+                Logger.LogInformation($"DealController.Delete did not find deal with an ID of {id}");
+                return NotFound("External account not found");
+            }
 
-            if (product is null) return NotFound("Deal not found");
-
-            Context.Remove(product);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"DealController.Update updated deal with an ID of {id}");
             return NoContent();
         }
     }

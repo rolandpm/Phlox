@@ -12,7 +12,7 @@ using Phlox.Models;
 namespace Phlox.Models.Migrations
 {
     [DbContext(typeof(PhloxContext))]
-    [Migration("20240116032140_FirstMigration")]
+    [Migration("20240118200812_FirstMigration")]
     partial class FirstMigration
     {
         /// <inheritdoc />

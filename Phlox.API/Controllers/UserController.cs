@@ -1,49 +1,44 @@
-﻿//TODDO: COMMENTS
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Phlox.Models;
+using Phlox.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Phlox.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController(PhloxContext context) : BaseController<UserController>(context)
+    public class UserController : BaseController<UserController>
     {
 
         /// <summary>
-        /// Gets all the users
+        /// Gets all the Users
         /// </summary>
-        /// <returns>List of all users</returns>
+        /// <returns>Returns a list of all Userss</returns>
         [HttpGet]
-        public async Task<ActionResult<List<Users>>> GetAll()
+        public ActionResult<List<Users>> GetAll()
         {
-            Logger.LogInformation("UserController.GetAll called");
+            Logger.LogInformation("UsersController.GetAll called");
 
-            return await Context.Users.ToListAsync();
+            return Context.GetAllUsers();
         }
 
         /// <summary>
         /// Gets a user based on ID.
         /// </summary>
         /// <param name="id">The user ID</param>
-        /// <returns>User with matching ID</returns>
+        /// <returns>Returns the user matching the ID specified. Returns 404 if the user does not exist.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Users>> Get(int id)
+        public ActionResult<Users> GetById(int id)
         {
-            Users? user = await (
-                from u in Context.Users
-                where u.Id == id
-                select u
-            ).FirstOrDefaultAsync();
+            Users? user = Context.GetUserById(id);
 
             if (user is null)
             {
-                Logger.LogInformation($"UserController.Get did not find user with an ID of {id}");
+                Logger.LogInformation($"UsersController.Get did not find user with an ID of {id}");
                 return NotFound();
             }
 
-            Logger.LogInformation($"UserController.Get found user {user}");
+            Logger.LogInformation($"UsersController.Get found user {user}");
             return user;
         }
 
@@ -51,44 +46,54 @@ namespace Phlox.API.Controllers
         /// Creates the specified user.
         /// </summary>
         /// <param name="user">The user.</param>
-        /// <returns>User that was created.</returns>
+        /// <returns>Returns the result of the create action.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create(Users user)
+        public IActionResult Create(UsersDTO userDTO)
         {
-            Context.Add(user);
-            await Context.SaveChangesAsync();
+            var newUser = userDTO.ToModel();
+            Context.CreateUser(newUser);
 
-            Logger.LogInformation("User {user.first_name} {user.last_name} created", user.FirstName, user.LastName);
-
-            return CreatedAtAction(nameof(Get), new {id = user.Id}, user);
+            Logger.LogInformation($"UsersController.Create created user {newUser}");
+            return CreatedAtAction(nameof(GetById), new { id = newUser.Id }, newUser);
         }
 
+        /// <summary>
+        /// Updates the specified External Account.
+        /// </summary>
+        /// <param name="id">The ID of the user.</param>
+        /// <param name="userDTO">The user dto.</param>
+        /// <returns>Returns the result of the update action. Returns 404 if the user does not exist.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Users user)
+        public IActionResult Update(int id, UsersDTO userDTO)
         {
+            Users user = userDTO.ToModel();
             user.Id = id;
-            var result = await Get(id);
-            var existingUser = result.Value;
 
-            if (existingUser is null) return NotFound();
+            if (!Context.UpdateUser(user))
+            {
+                Logger.LogInformation($"UsersController.Update did not find user with an ID of {id}");
+                return NotFound("External account not found");
+            }
 
-            Context.Entry(existingUser).CurrentValues.SetValues(user);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"UsersController.Update updated user with an ID of {id}");
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes the specified user.
+        /// </summary>
+        /// <param name="id">The identifier of the user to delete</param>
+        /// <returns>Returns the result of the delete action. Returns 404 if the user does not exist.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var result = await Get(id);
-            var user = result.Value;
+            if (!Context.DeleteUser(id))
+            {
+                Logger.LogInformation($"UsersController.Delete did not find user with an ID of {id}");
+                return NotFound("External account not found");
+            }
 
-            if (user is null) return NotFound("User not found");
-
-            Context.Remove(user);
-            await Context.SaveChangesAsync();
-
+            Logger.LogInformation($"UsersController.Update updated user with an ID of {id}");
             return NoContent();
         }
     }

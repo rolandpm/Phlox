@@ -13,18 +13,34 @@ namespace Phlox.Models
     [PrimaryKey(nameof(ItemId), nameof(DealId))]
     public class ItemDeal
     {
-        [ForeignKey(nameof(Item))]
-        [Required]
+        //TODO: ToString
         public required int ItemId { get; set; }
-
-        [ForeignKey(nameof(Deal))]
-        [Required]
         public required int DealId { get; set; }
 
         [JsonIgnore]
-        public required Item Item { get; init; }
+        [ForeignKey(nameof(ItemId))]
+        public Item? Item { get; init; }
 
         [JsonIgnore]
-        public required Deal Deal { get; init; }
+        [ForeignKey(nameof(DealId))]
+        public Deal? Deal { get; init; }
+    }
+
+    public class ItemDealDTO
+    {
+        [JsonRequired]
+        public int ItemId { get; set; }
+
+        [JsonRequired]
+        public int DealId { get; set; }
+
+        public ItemDeal ToModel()
+        {
+            return new ItemDeal
+            {
+                ItemId = ItemId,
+                DealId = DealId
+            };
+        }
     }
 }
