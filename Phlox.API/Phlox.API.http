@@ -4,3 +4,80 @@ GET {{Phlox.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+POST {{Phlox.API_HostAddress}}/externalaccount
+Content-Type: application/json
+
+{
+  "UserId":1,
+  "ServiceName":"test",
+  "Nickname":"test"
+}
+
+###
+
+POST {{Phlox.API_HostAddress}}/externalaccount
+Content-Type: application/json
+
+{
+  //ExternalAccount
+}
+
+###
+
+POST {{Phlox.API_HostAddress}}/user
+Content-Type: application/json
+
+{
+  "LastName":"Mahe",
+  "FirstName":"Roland",
+  "Nickname":"rolandpm",
+  "Email":"rolandpmahe@gmail.com"
+}
+
+###
+
+POST {{Phlox.API_HostAddress}}/item
+Content-Type: application/json
+
+{
+    "UserId":1,
+    "ProductId":1,
+    "Name":"test",
+    "Quantity":20,
+    "Info":"resttesttest"
+}
+
+###
+
+POST {{Phlox.API_HostAddress}}/itemdeal
+Content-Type: application/json
+
+{
+  "ItemId":1,
+  "DealId":1
+}
+
+###
+
+POST {{Phlox.API_HostAddress}}/product
+Content-Type: application/json
+
+{
+    "Type":"test",
+    "Name":"name",
+    "Price":2000
+}
+
+###
+
+POST {{Phlox.API_HostAddress}}/deal
+Content-Type: application/json
+
+{
+    "Name":"1forAll",
+    "Discount":50,
+    "Info":"testtest"
+}
+
+###

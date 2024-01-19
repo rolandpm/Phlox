@@ -12,51 +12,44 @@ using System.Threading.Tasks;
 namespace Phlox.Models
 {
     [PrimaryKey(nameof(Id))]
-    public class Users
+    public class ExternalAccount
     {
         //TODO: ToString
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required]
-        public required string LastName { get; set; }
+        public required int UserId { get; set; }
 
         [Required]
-        public required string FirstName { get; set; }
+        public required string ServiceName { get; set; }
 
         [Required]
         public required string Nickname { get; set; }
 
-        public string? Email { get; set; }
-
         [JsonIgnore]
-        public List<Item>? Items { get; } = new();
-
-        [JsonIgnore]
-        public List<ExternalAccount>? ExternalAccounts { get; } = new();
+        [ForeignKey(nameof(UserId))]
+        public Users? User { get; init; }
     }
 
-    public class UsersDTO
+    public class ExternalAccountDTO
     {
         [JsonRequired]
-        public required string LastName { get; set; }
+        public int UserId { get; set; }
 
         [JsonRequired]
-        public required string FirstName { get; set; }
+        public required string ServiceName { get; set; }
 
         [JsonRequired]
         public required string Nickname { get; set; }
 
-        public string? Email { get; set; }
-
-        public Users ToModel()
+        public ExternalAccount ToModel()
         {
-            return new Users
+            return new ExternalAccount
             {
-                LastName = LastName,
-                FirstName = FirstName,
-                Nickname = Nickname,
-                Email = Email
+                UserId = UserId,
+                ServiceName = ServiceName,
+                Nickname = Nickname
             };
         }
     }
